@@ -34,7 +34,7 @@ export default function RegisterScreen() {
     setTimeout(() => {
       setIsLoading(false);
       Alert.alert("Sucesso", "Conta criada com sucesso!", [
-        { text: "OK", onPress: () => router.push("/login") } // Volta para o login
+        { text: "OK", onPress: () => router.push("./index.tsx") } // Volta para o login
       ]);
     }, 2000);
   };
@@ -179,7 +179,7 @@ export default function RegisterScreen() {
           <View className="mt-6 items-center space-y-4 pb-4">
             <View className="flex-row">
               <Text className="text-gray-500">Já tem uma conta? </Text>
-              <TouchableOpacity onPress={() => router.push("/login")}>
+              <TouchableOpacity onPress={() => router.push("./index.tsx")}>
                 <Text className="text-blue-600 font-bold">Fazer Login</Text>
               </TouchableOpacity>
             </View>

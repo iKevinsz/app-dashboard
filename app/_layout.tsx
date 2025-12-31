@@ -2,24 +2,16 @@ import { Stack } from 'expo-router';
 
 export default function RootLayout() {
   return (
-    <Stack>
-      {/* Esconde o cabeçalho da tela de Login (index) */}
-      <Stack.Screen 
-        name="index" 
-        options={{ headerShown: false }} 
-      />
-
-      {/* Esconde o cabeçalho do Drawer (Menu Lateral) */}
-      <Stack.Screen 
-        name="(drawer)" 
-        options={{ headerShown: false }} 
-      />
-
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* O login */}
+      <Stack.Screen name="index" /> 
       
-      <Stack.Screen 
-        name="login" 
-        options={{ headerShown: false }} 
-      />
+      {/* O grupo do drawer */}
+      <Stack.Screen name="(drawer)" />
+      
+      {/* Outras telas */}
+      <Stack.Screen name="auth/register" />
+      <Stack.Screen name="auth/forgot-password" />
     </Stack>
   );
 }
