@@ -1,25 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
-  View, Text, TextInput, TouchableOpacity, 
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  KeyboardAvoidingView, 
+  Platform, 
+  ScrollView, 
+  ActivityIndicator, 
+  Alert, 
+  Keyboard,
+  Dimensions,
+  Animated,
+  TouchableWithoutFeedback
 } from "react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { FontAwesome6, Feather } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient"; 
+import { Feather } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Paleta de Cores
+const COLORS = {
+  PRIMARY_BLUE: '#023151',
+  ACCENT_ORANGE: '#FF6600',
+  WHITE: '#FFFFFF',
+  GRAY_BG: '#F3F4F6',
+  GRAY_TEXT: '#9CA3AF'
+};
 
 export default function RegisterScreen() {
   const router = useRouter();
+  
+  // Estados do Formulário
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // Animações
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [slideAnim] = useState(new Animated.Value(30));
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
   const handleRegister = async () => {
+    Keyboard.dismiss();
+    
+    // Validação básica
     if (!name || !email || !password || !confirmPassword) {
-      Alert.alert("Erro", "Preencha todos os campos.");
+      Alert.alert("Atenção", "Por favor, preencha todos os campos.");
       return;
     }
 
@@ -30,168 +77,244 @@ export default function RegisterScreen() {
 
     setIsLoading(true);
     
-    // Simulação de chamada de API
+    // Simulação de API
     setTimeout(() => {
       setIsLoading(false);
       Alert.alert("Sucesso", "Conta criada com sucesso!", [
-        { text: "OK", onPress: () => router.push("./index.tsx") } // Volta para o login
+        { text: "Fazer Login", onPress: () => router.replace("/") } // Volta para Login
       ]);
     }, 2000);
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-white"
-    >
-      <StatusBar style="light" />
-      
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} bounces={false}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={{ flex: 1, backgroundColor: COLORS.PRIMARY_BLUE }}>
+        <StatusBar style="light" />
         
-        {/* TOPO: BRANDING (Laranja para diferenciar do Login Azul) */}
-        <View className="bg-orange-600 h-[35%] items-center justify-center relative overflow-hidden rounded-b-[40px]">
-          <View className="absolute -top-20 -left-20 w-64 h-64 bg-orange-400 rounded-full opacity-30 blur-3xl" />
-          <View className="absolute -bottom-10 -right-10 w-48 h-48 bg-blue-500 rounded-full opacity-20 blur-3xl" />
-
-          <View className="items-center z-10 p-6">
-            <View className="bg-white/10 p-4 rounded-3xl mb-4 backdrop-blur-md border border-white/20">
-               <FontAwesome6 name="shield-halved" size={32} color="white" />
-            </View>
-            <Text className="text-white text-3xl font-bold mb-2 text-center">Comece Agora</Text>
-            <Text className="text-orange-100 text-center text-sm px-8">
-              Junte-se a milhares de empresas que crescem com a Datacaixa.
-            </Text>
-          </View>
+        {/* BACKGROUND PADRÃO */}
+        <View className="absolute inset-0 w-full h-full">
+          <LinearGradient
+              colors={[COLORS.PRIMARY_BLUE, '#011d30']} 
+              style={{ flex: 1 }}
+          />
+          <View className="absolute -top-20 -left-20 w-80 h-80 bg-white rounded-full opacity-5 blur-3xl" />
+          <View className="absolute top-1/4 -right-32 w-80 h-80 rounded-full opacity-10 blur-3xl" style={{ backgroundColor: COLORS.ACCENT_ORANGE }} />
         </View>
 
-        {/* ÁREA DE FORMULÁRIO */}
-        <View className="flex-1 px-8 pt-8 pb-6 bg-white">
-          
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-800">Criar nova conta</Text>
-            <Text className="text-gray-500 mt-1 text-sm">Preencha os dados abaixo.</Text>
-          </View>
-
-          {/* INPUT NOME */}
-          <View className="mb-4">
-            <Text className="text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Nome Completo</Text>
-            <View 
-              className={`flex-row items-center border-2 rounded-xl px-4 h-12 bg-gray-50 transition-all ${
-                focusedField === 'name' ? 'border-orange-500 bg-white' : 'border-gray-100'
-              }`}
-            >
-              <Feather name="user" size={18} color={focusedField === 'name' ? '#F97316' : '#9CA3AF'} />
-              <TextInput
-                className="flex-1 ml-3 text-sm text-gray-800"
-                placeholder="Seu nome"
-                value={name}
-                onChangeText={setName}
-                onFocus={() => setFocusedField('name')}
-                onBlur={() => setFocusedField(null)}
-              />
-            </View>
-          </View>
-
-          {/* INPUT EMAIL */}
-          <View className="mb-4">
-            <Text className="text-xs font-bold text-gray-500 uppercase mb-1 ml-1">E-mail Corporativo</Text>
-            <View 
-              className={`flex-row items-center border-2 rounded-xl px-4 h-12 bg-gray-50 transition-all ${
-                focusedField === 'email' ? 'border-orange-500 bg-white' : 'border-gray-100'
-              }`}
-            >
-              <Feather name="mail" size={18} color={focusedField === 'email' ? '#F97316' : '#9CA3AF'} />
-              <TextInput
-                className="flex-1 ml-3 text-sm text-gray-800"
-                placeholder="empresa@email.com"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                onFocus={() => setFocusedField('email')}
-                onBlur={() => setFocusedField(null)}
-              />
-            </View>
-          </View>
-
-          {/* INPUT SENHA */}
-          <View className="mb-4">
-            <Text className="text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Senha</Text>
-            <View 
-              className={`flex-row items-center border-2 rounded-xl px-4 h-12 bg-gray-50 transition-all ${
-                focusedField === 'password' ? 'border-orange-500 bg-white' : 'border-gray-100'
-              }`}
-            >
-              <Feather name="lock" size={18} color={focusedField === 'password' ? '#F97316' : '#9CA3AF'} />
-              <TextInput
-                className="flex-1 ml-3 text-sm text-gray-800"
-                placeholder="Mínimo 8 caracteres"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                onFocus={() => setFocusedField('password')}
-                onBlur={() => setFocusedField(null)}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Feather name={showPassword ? "eye-off" : "eye"} size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* INPUT CONFIRMAR SENHA */}
-          <View className="mb-8">
-            <Text className="text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Confirmar Senha</Text>
-            <View 
-              className={`flex-row items-center border-2 rounded-xl px-4 h-12 bg-gray-50 transition-all ${
-                focusedField === 'confirm' ? 'border-orange-500 bg-white' : 'border-gray-100'
-              }`}
-            >
-              <Feather name="lock" size={18} color={focusedField === 'confirm' ? '#F97316' : '#9CA3AF'} />
-              <TextInput
-                className="flex-1 ml-3 text-sm text-gray-800"
-                placeholder="Repita a senha"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showPassword}
-                onFocus={() => setFocusedField('confirm')}
-                onBlur={() => setFocusedField(null)}
-              />
-            </View>
-          </View>
-
-          {/* BOTÃO CADASTRAR */}
-          <TouchableOpacity
-            onPress={handleRegister}
-            disabled={isLoading}
-            className={`w-full h-14 bg-orange-600 rounded-xl flex-row items-center justify-center shadow-lg shadow-orange-200 active:bg-orange-700 ${isLoading ? 'opacity-70' : ''}`}
+        <SafeAreaView style={{ flex: 1 }}>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1 }}
           >
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <>
-                <Text className="text-white font-bold text-lg mr-2">Criar Conta</Text>
-                <Feather name="arrow-right" size={20} color="white" />
-              </>
-            )}
-          </TouchableOpacity>
+            <ScrollView 
+              contentContainerStyle={{ flexGrow: 1 }}
+              keyboardShouldPersistTaps="handled" 
+              showsVerticalScrollIndicator={false}
+            >
+              
+              {/* HEADER COM BOTÃO VOLTAR */}
+              <Animated.View 
+                style={{ 
+                  opacity: fadeAnim, 
+                  transform: [{ translateY: slideAnim }],
+                  paddingHorizontal: 24,
+                  paddingTop: 20,
+                  paddingBottom: 30
+                }}
+              >
+                  <TouchableOpacity 
+                    onPress={() => router.back()} 
+                    style={{ 
+                      width: 40, height: 40, 
+                      backgroundColor: 'rgba(255,255,255,0.1)', 
+                      borderRadius: 12, 
+                      justifyContent: 'center', alignItems: 'center',
+                      marginBottom: 20
+                    }}
+                  >
+                    <Feather name="arrow-left" size={24} color="white" />
+                  </TouchableOpacity>
 
-          {/* RODAPÉ */}
-          <View className="mt-6 items-center space-y-4 pb-4">
-            <View className="flex-row">
-              <Text className="text-gray-500">Já tem uma conta? </Text>
-              <TouchableOpacity onPress={() => router.push("./index.tsx")}>
-                <Text className="text-blue-600 font-bold">Fazer Login</Text>
-              </TouchableOpacity>
-            </View>
-            
-            <View className="flex-row items-center gap-2 opacity-50">
-              <Feather name="check-circle" size={12} color="#10B981" />
-              <Text className="text-[10px] uppercase font-bold text-gray-400">Dados Protegidos</Text>
-            </View>
-          </View>
+                  <Text style={{ fontSize: 32, fontWeight: '800', color: COLORS.WHITE }}>
+                    Criar Conta
+                  </Text>
+                  <Text style={{ color: '#cbd5e1', marginTop: 8, maxWidth: 300 }}>
+                    Junte-se à Datacaixa e transforme a gestão do seu negócio.
+                  </Text>
+              </Animated.View>
 
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+              {/* CARD DO FORMULÁRIO */}
+              <Animated.View 
+                style={{ 
+                  opacity: fadeAnim, 
+                  transform: [{ translateY: slideAnim }],
+                  backgroundColor: COLORS.WHITE,
+                  borderTopLeftRadius: 40,
+                  borderTopRightRadius: 40,
+                  paddingHorizontal: 32,
+                  paddingTop: 40,
+                  paddingBottom: 40,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: -2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 10,
+                  elevation: 10,
+                  flex: 1 // Ocupa o resto da tela visualmente
+                }}
+              >
+                
+                {/* 1. NOME */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={styles.label}>Nome Completo</Text>
+                  <View style={[styles.inputContainer, { borderColor: focusedField === 'name' ? COLORS.PRIMARY_BLUE : 'transparent' }]}>
+                    <Feather name="user" size={20} color={focusedField === 'name' ? COLORS.PRIMARY_BLUE : COLORS.GRAY_TEXT} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Seu nome"
+                      placeholderTextColor={COLORS.GRAY_TEXT}
+                      value={name}
+                      onChangeText={setName}
+                      onFocus={() => setFocusedField('name')}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                  </View>
+                </View>
+
+                {/* 2. EMAIL */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={styles.label}>E-mail Corporativo</Text>
+                  <View style={[styles.inputContainer, { borderColor: focusedField === 'email' ? COLORS.PRIMARY_BLUE : 'transparent' }]}>
+                    <Feather name="mail" size={20} color={focusedField === 'email' ? COLORS.PRIMARY_BLUE : COLORS.GRAY_TEXT} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="empresa@email.com"
+                      placeholderTextColor={COLORS.GRAY_TEXT}
+                      value={email}
+                      onChangeText={setEmail}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      onFocus={() => setFocusedField('email')}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                  </View>
+                </View>
+
+                {/* 3. SENHA */}
+                <View style={{ marginBottom: 20 }}>
+                  <Text style={styles.label}>Senha</Text>
+                  <View style={[styles.inputContainer, { borderColor: focusedField === 'password' ? COLORS.PRIMARY_BLUE : 'transparent' }]}>
+                    <Feather name="lock" size={20} color={focusedField === 'password' ? COLORS.PRIMARY_BLUE : COLORS.GRAY_TEXT} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Mínimo 6 caracteres"
+                      placeholderTextColor={COLORS.GRAY_TEXT}
+                      value={password}
+                      onChangeText={setPassword}
+                      secureTextEntry={!showPassword}
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 4 }}>
+                      <Feather name={showPassword ? "eye-off" : "eye"} size={20} color={COLORS.GRAY_TEXT} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* 4. CONFIRMAR SENHA */}
+                <View style={{ marginBottom: 32 }}>
+                  <Text style={styles.label}>Confirmar Senha</Text>
+                  <View style={[styles.inputContainer, { borderColor: focusedField === 'confirm' ? COLORS.PRIMARY_BLUE : 'transparent' }]}>
+                    <Feather name="check-circle" size={20} color={focusedField === 'confirm' ? COLORS.PRIMARY_BLUE : COLORS.GRAY_TEXT} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Repita a senha"
+                      placeholderTextColor={COLORS.GRAY_TEXT}
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
+                      secureTextEntry={!showPassword}
+                      onFocus={() => setFocusedField('confirm')}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                  </View>
+                </View>
+
+                {/* BOTÃO CADASTRAR (LARANJA) */}
+                <TouchableOpacity
+                  onPress={handleRegister}
+                  disabled={isLoading}
+                  activeOpacity={0.8}
+                  style={styles.button}
+                >
+                   {isLoading ? (
+                     <ActivityIndicator color="white" />
+                   ) : (
+                     <>
+                       <Text style={styles.buttonText}>Cadastrar</Text>
+                       <Feather name="arrow-right" size={22} color="white" />
+                     </>
+                   )}
+                </TouchableOpacity>
+
+                {/* LOGIN LINK */}
+                <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20, paddingBottom: 20 }}>
+                   <Text style={{ color: '#64748b', fontSize: 15 }}>Já tem uma conta? </Text>
+                   <TouchableOpacity onPress={() => router.back()}>
+                      <Text style={{ color: COLORS.PRIMARY_BLUE, fontWeight: 'bold', fontSize: 15, textDecorationLine: 'underline' }}>
+                        Fazer Login
+                      </Text>
+                   </TouchableOpacity>
+                </View>
+
+              </Animated.View>
+            </ScrollView>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
+
+// Estilos extraídos para organização
+const styles = {
+  label: {
+    fontSize: 12, 
+    fontWeight: '700' as '700', 
+    color: '#64748b', 
+    marginBottom: 8, 
+    textTransform: 'uppercase' as 'uppercase'
+  },
+  inputContainer: {
+    flexDirection: 'row' as 'row',
+    alignItems: 'center' as 'center',
+    height: 56,
+    backgroundColor: COLORS.GRAY_BG,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+  },
+  input: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 16,
+    color: '#334155'
+  },
+  button: {
+    height: 56,
+    backgroundColor: COLORS.ACCENT_ORANGE,
+    borderRadius: 16,
+    flexDirection: 'row' as 'row',
+    alignItems: 'center' as 'center',
+    justifyContent: 'center' as 'center',
+    shadowColor: COLORS.ACCENT_ORANGE,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  buttonText: {
+    color: 'white', 
+    fontWeight: 'bold' as 'bold', 
+    fontSize: 18, 
+    marginRight: 8
+  }
+};

@@ -1,17 +1,30 @@
 import { Stack } from 'expo-router';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
-export default function RootLayout() {
+// Componente interno para acessar o hook useTheme
+function RootNavigator() {
+  const { colors, isDarkMode } = useTheme();
+
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      {/* O login */}
-      <Stack.Screen name="index" /> 
-      
-      {/* O grupo do drawer */}
-      <Stack.Screen name="(drawer)" />
-      
-      {/* Outras telas */}
-      <Stack.Screen name="auth/register" />
-      <Stack.Screen name="auth/forgot-password" />
-    </Stack>
+    <>
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      <Stack screenOptions={{
+        headerStyle: { backgroundColor: colors.BG },
+        headerTintColor: colors.TEXT_DARK,
+        contentStyle: { backgroundColor: colors.BG }, // Fundo global
+        headerShown: false
+      }}>
+        {/* Suas telas */}
+      </Stack>
+    </>
+  );
+}
+
+export default function Layout() {
+  return (
+    <ThemeProvider>
+      <RootNavigator />
+    </ThemeProvider>
   );
 }

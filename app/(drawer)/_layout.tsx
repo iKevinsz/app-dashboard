@@ -4,162 +4,103 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Drawer } from 'expo-router/drawer';
 import { useRouter, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FontAwesome6, Feather, MaterialIcons } from "@expo/vector-icons";
+import { 
+  X, 
+  Store, 
+  UtensilsCrossed, 
+  BarChart3, 
+  Wallet, 
+  User, 
+  LogOut 
+} from 'lucide-react-native';
 
-// --- ITEM DE MENU PERSONALIZADO ---
-const DrawerItem = ({ icon, label, route, isActive, onPress }: any) => (
-  <TouchableOpacity 
-    onPress={onPress}
-    className={`flex-row items-center p-4 rounded-xl mb-2 transition-all active:scale-[0.98] ${
-      isActive ? 'bg-blue-50' : 'bg-transparent'
-    }`}
-  >
-    <View className={`w-8 items-center justify-center`}>
-      {icon(isActive ? "#2563EB" : "#9CA3AF")}
-    </View>
-    <Text className={`ml-3 font-bold text-sm ${isActive ? 'text-blue-600' : 'text-gray-500'}`}>
-      {label}
-    </Text>
-    {isActive && (
-      <View className="ml-auto w-1.5 h-1.5 bg-blue-600 rounded-full" />
-    )}
-  </TouchableOpacity>
-);
-
-// --- CONTEÚDO CUSTOMIZADO DO DRAWER ---
+// --- CONTEÚDO CUSTOMIZADO DA SIDEBAR ---
 function CustomDrawerContent(props: any) {
   const router = useRouter();
-  const pathname = usePathname(); 
+  const pathname = usePathname();
   const insets = useSafeAreaInsets();
 
+  // --- ITEM DE MENU ---
+  const MenuItem = ({ label, icon: Icon, route }: any) => {
+    // isActive verifica rota atual (lógica opcional para estilização)
+    const isActive = pathname.includes(route.replace('/', ''));
+    
+    return (
+      <TouchableOpacity 
+        onPress={() => router.push(route)}
+        className="flex-row items-center py-4 px-2 active:bg-gray-50 rounded-lg"
+      >
+        <Icon size={22} color="#4b5563" /> 
+        <Text className="ml-4 text-gray-700 font-medium text-base">{label}</Text>
+      </TouchableOpacity>
+    );
+  }
+
   return (
-    <View className="flex-1 bg-blue-900" style={{ paddingTop: insets.top }}>
+    // PaddingTop ajusta para a barra de status
+    <View style={{ flex: 1, paddingTop: insets.top }} className="bg-white">
       
-      {/* 1. CABEÇALHO DO PERFIL */}
-      <View className="px-6 pt-6 pb-8">
-        <View className="flex-row items-center gap-4">
-          <View className="w-14 h-14 bg-white/20 rounded-full items-center justify-center border border-white/30 backdrop-blur-md">
-             <FontAwesome6 name="user-large" size={24} color="white" />
-          </View>
-          <View>
-            <Text className="text-white font-bold text-lg">KEVIN-TESTE</Text>
-            <Text className="text-blue-200 text-xs">CNPJ: 00.000.000/0000-00</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* 2. CORPO BRANCO ARREDONDADO */}
-      <View className="flex-1 bg-white mt-2 rounded-t-[35px] overflow-hidden">
-        <ScrollView 
-          className="flex-1 px-6 pt-8" 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+      {/* 1. HEADER: Logo e Fechar */}
+      <View className="flex-row justify-between items-center p-6 border-b border-gray-100 mt-2">
+        <Text className="text-xl font-bold text-gray-900">
+          Datacaixa <Text className="text-orange-700">App</Text>
+        </Text>
+        
+        <TouchableOpacity 
+          onPress={() => props.navigation.closeDrawer()}
+          className="p-1"
         >
-          <Text className="text-xs font-bold text-gray-400 uppercase mb-4 ml-2">Principal</Text>
-
-          {/* AJUSTADO: Rota aponta para '/home' */}
-          <DrawerItem 
-            label="Visão Geral"
-            route="/home"
-            isActive={pathname === '/home'}
-            onPress={() => router.push('/home')}
-            icon={(color: string) => <Feather name="grid" size={20} color={color} />}
-          />
-
-          <DrawerItem 
-            label="Ponto de Venda"
-            route="/pdv"
-            isActive={pathname === '/pdv'}
-            onPress={() => router.push('/pdv')}
-            icon={(color: string) => <FontAwesome6 name="cash-register" size={18} color={color} />}
-          />
-
-          <DrawerItem 
-            label="Cardápio Digital"
-            route="/cardapio"
-            isActive={pathname === '/cardapio'}
-            onPress={() => router.push('/cardapio')}
-            icon={(color: string) => <FontAwesome6 name="burger" size={18} color={color} />}
-          />
-
-          <Text className="text-xs font-bold text-gray-400 uppercase mb-4 mt-4 ml-2">Gestão</Text>
-
-          {/* AJUSTADO: Aponta corretamente para '/financeiro' */}
-          <DrawerItem 
-            label="Financeiro"
-            route="/financeiro"
-            isActive={pathname === '/financeiro'}
-            onPress={() => router.push('/financeiro')}
-            icon={(color: string) => <MaterialIcons name="attach-money" size={22} color={color} />}
-          />
-
-          {/* AJUSTADO: Aponta para '/dashboard-faturamento' */}
-          <DrawerItem 
-            label="Faturamento"
-            route="/dashboard-faturamento"
-            isActive={pathname === '/dashboard-faturamento'}
-            onPress={() => router.push('/dashboard-faturamento')}
-            icon={(color: string) => <MaterialIcons name="bar-chart" size={22} color={color} />}
-          />
-
-          <DrawerItem 
-            label="Fluxo de Caixa"
-            route="/fluxo-caixa"
-            isActive={pathname === '/fluxo-caixa'}
-            onPress={() => router.push('/fluxo-caixa')}
-            icon={(color: string) => <FontAwesome6 name="money-bill-transfer" size={18} color={color} />}
-          />
-
-           <DrawerItem 
-            label="Configurações"
-            route="/config"
-            isActive={false} 
-            onPress={() => {}}
-            icon={(color: string) => <Feather name="settings" size={20} color={color} />}
-          />
-
-        </ScrollView>
-
-        {/* 3. RODAPÉ */}
-        <View className="p-6 border-t border-gray-100">
-          <TouchableOpacity 
-            onPress={() => router.replace('/')} // Volta para o Login (raiz)
-            className="flex-row items-center justify-center p-4 bg-red-50 rounded-xl active:bg-red-100"
-          >
-            <Feather name="log-out" size={18} color="#EF4444" />
-            <Text className="ml-2 font-bold text-red-500">Sair da Conta</Text>
-          </TouchableOpacity>
-        </View>
-
+           <X size={24} color="#1f2937" />
+        </TouchableOpacity>
       </View>
+
+      {/* 2. LISTA DE NAVEGAÇÃO */}
+      <ScrollView className="flex-1 px-4 py-4" showsVerticalScrollIndicator={false}>
+        <MenuItem label="Dashboard PDV" icon={Store} route="/pdv" />
+        <MenuItem label="Cardápio" icon={UtensilsCrossed} route="/cardapio" />
+        <MenuItem label="Faturamento" icon={BarChart3} route="/dashboard-faturamento" />
+        <MenuItem label="Financeiro" icon={Wallet} route="/financeiro" />
+        <MenuItem label="Meu Perfil" icon={User} route="/perfil" />
+      </ScrollView>
+
+      {/* 3. RODAPÉ: Sair */}
+      <View className="p-6 border-t border-gray-100 mb-6">
+        <TouchableOpacity 
+          onPress={() => router.replace('/')} 
+          className="flex-row items-center px-2 py-2"
+        >
+          <LogOut size={22} color="#dc2626" />
+          <Text className="ml-4 text-red-600 font-medium text-base">Sair</Text>
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 }
 
-// --- CONFIGURAÇÃO DAS ROTAS DO DRAWER ---
+// --- LAYOUT PRINCIPAL DO DRAWER ---
 export default function DrawerLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
-          headerShown: false,
-          drawerType: 'slide',
+          headerShown: false, // Header controlado pelas Tabs internas
+          drawerType: 'front', // Sobrepõe o conteúdo
           drawerStyle: { 
             width: '80%', 
-            backgroundColor: 'transparent',
+            backgroundColor: 'white',
+            borderTopRightRadius: 24, 
+            borderBottomRightRadius: 24, 
           },
-          overlayColor: 'rgba(0,0,0,0.5)',
+          overlayColor: 'rgba(0,0,0,0.5)', 
         }}
       >
-        
-        <Drawer.Screen name="index" /> 
-        
-        <Drawer.Screen name="pdv" />
-        <Drawer.Screen name="cardapio" />
-        <Drawer.Screen name="financeiro" />
-        <Drawer.Screen name="dashboard-faturamento" />
-        <Drawer.Screen name="fluxo-caixa" />
+        {/* Rota principal: Grupo de Abas */}
+        <Drawer.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Rotas secundárias ocultas */}
+        <Drawer.Screen name="home" options={{ headerShown: false }} />
       </Drawer>
     </GestureHandlerRootView>
   );
